@@ -1,10 +1,10 @@
 // Constants for emotion options
 const DEFAULT_EMOTIONS = {
-  1: { id: 1, text: "Frustrated to the extent that I'm considering quitting", color: "#e74c3c", name: "Frustrated" },
-  2: { id: 2, text: "Sad for needing to do it", color: "#9b59b6", name: "Sad" },
-  3: { id: 3, text: "Neutral", color: "#3498db", name: "Neutral" },
-  4: { id: 4, text: "Enjoying", color: "#2ecc71", name: "Enjoying" },
-  5: { id: 5, text: "Super thrilled", color: "#27ae60", name: "Thrilled" }
+  1: { id: 1, text: "Engaged / Energized - Peak productivity, alignment with goals", color: "#FFD700", name: "🌟 Engaged", emoji: "🌟" },
+  2: { id: 2, text: "Neutral / Numb - Going through the motions", color: "#808080", name: "😐 Neutral", emoji: "😐" },
+  3: { id: 3, text: "Frustrated / Angry - Resistance or tension", color: "#FF4500", name: "😖 Frustrated", emoji: "😖" },
+  4: { id: 4, text: "Sad / Resigned - Emotional drain or disappointment", color: "#4682B4", name: "😔 Sad", emoji: "😔" },
+  5: { id: 5, text: "Anxious / Insecure - Uncertainty or worry", color: "#9370DB", name: "😕 Anxious", emoji: "😕" }
 };
 
 // Default settings

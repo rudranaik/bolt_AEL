@@ -18,6 +18,13 @@
   --neutral-800: #1e293b;
   --neutral-900: #0f172a;
   
+  /* Emotion Colors */
+  --emotion-engaged: #FFD700;
+  --emotion-neutral: #808080;
+  --emotion-frustrated: #FF4500;
+  --emotion-sad: #4682B4;
+  --emotion-anxious: #9370DB;
+  
   --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
   --shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
   --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
@@ -155,28 +162,26 @@ textarea:focus {
   border: 1px solid var(--neutral-200);
   cursor: pointer;
   transition: all 0.2s ease;
+  background-color: white;
 }
 
 .emotion-option:hover {
-  border-color: var(--primary);
-  background-color: var(--primary-light);
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
 }
 
 .emotion-option.selected {
-  border-color: var(--primary);
-  background-color: var(--primary-light);
+  border-width: 2px;
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
 }
 
 .emotion-icon {
-  width: 24px;
-  height: 24px;
-  border-radius: 50%;
+  font-size: 24px;
   margin-bottom: 8px;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 16px;
-  flex-shrink: 0;
 }
 
 .emotion-name {
@@ -195,11 +200,50 @@ textarea:focus {
   -webkit-box-orient: vertical;
 }
 
-.emotion-icon.frustrated { background-color: var(--emotion-frustrated); }
-.emotion-icon.sad { background-color: var(--emotion-sad); }
-.emotion-icon.neutral { background-color: var(--emotion-neutral); }
-.emotion-icon.enjoying { background-color: var(--emotion-enjoying); }
-.emotion-icon.thrilled { background-color: var(--emotion-thrilled); }
+.emotion-option[data-emotion="1"] {
+  border-color: var(--emotion-engaged);
+}
+
+.emotion-option[data-emotion="2"] {
+  border-color: var(--emotion-neutral);
+}
+
+.emotion-option[data-emotion="3"] {
+  border-color: var(--emotion-frustrated);
+}
+
+.emotion-option[data-emotion="4"] {
+  border-color: var(--emotion-sad);
+}
+
+.emotion-option[data-emotion="5"] {
+  border-color: var(--emotion-anxious);
+}
+
+.emotion-option.selected[data-emotion="1"] {
+  background-color: var(--emotion-engaged);
+  color: black;
+}
+
+.emotion-option.selected[data-emotion="2"] {
+  background-color: var(--emotion-neutral);
+  color: white;
+}
+
+.emotion-option.selected[data-emotion="3"] {
+  background-color: var(--emotion-frustrated);
+  color: white;
+}
+
+.emotion-option.selected[data-emotion="4"] {
+  background-color: var(--emotion-sad);
+  color: white;
+}
+
+.emotion-option.selected[data-emotion="5"] {
+  background-color: var(--emotion-anxious);
+  color: white;
+}
 
 /* History Section */
 .history-header {
