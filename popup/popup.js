@@ -20,13 +20,24 @@ const frequencyButtons = document.querySelectorAll('.frequency-btn');
 const settingsAlert = document.getElementById('settingsAlert');
 const notificationWarning = document.getElementById('notificationWarning');
 const enableNotificationsBtn = document.getElementById('enableNotificationsBtn');
-const nextPromptTime = document.getElementById('nextPromptTime');
+const nextPromptTimeElement = document.getElementById('nextPromptTime');
 const emotionNameInputs = document.querySelectorAll('.emotion-name-field');
 const saveEmotionNames = document.getElementById('saveEmotionNames');
+const emotionNameElements = document.querySelectorAll('.emotion-name');
+
+// Update emotion names in UI
+function updateEmotionNamesUI() {
+  emotionNameElements.forEach(element => {
+    const emotionId = element.parentElement.dataset.emotion;
+    if (emotionId && EMOTIONS[emotionId]) {
+      element.textContent = EMOTIONS[emotionId].name;
+    }
+  });
+}
 
 // Tab Navigation
 tabButtons.forEach(button => {
-  button.addEventListener('click', () => {
+  button.addEventListener('click', async () => {
     tabButtons.forEach(btn => btn.classList.remove('active'));
     sections.forEach(section => section.classList.remove('active'));
     
@@ -36,9 +47,16 @@ tabButtons.forEach(button => {
     document.getElementById(targetId).classList.add('active');
     
     if (button.id === 'historyTab') {
-      loadLogEntries();
+      await loadLogEntries();
     } else if (button.id === 'settingsTab') {
-      loadSettings();
+      await loadSettings();
+    } else if (button.id === 'logTab') {
+      // Refresh emotion names when switching to log tab
+      const response = await chrome.runtime.sendMessage({ type: 'getSettings' });
+      if (response.settings?.emotions) {
+        EMOTIONS = response.settings.emotions;
+        updateEmotionNamesUI();
+      }
     }
   });
 });
@@ -96,8 +114,15 @@ saveLogBtn.addEventListener('click', async () => {
 // Load Log Entries
 async function loadLogEntries() {
   try {
-    const response = await chrome.runtime.sendMessage({ type: 'getLogs' });
-    const logs = response.logs || [];
+    const [logsResponse, settingsResponse] = await Promise.all([
+      chrome.runtime.sendMessage({ type: 'getLogs' }),
+      chrome.runtime.sendMessage({ type: 'getSettings' })
+    ]);
+    
+    const logs = logsResponse.logs || [];
+    if (settingsResponse.settings?.emotions) {
+      EMOTIONS = settingsResponse.settings.emotions;
+    }
     
     logEntries.innerHTML = '';
     
@@ -112,10 +137,11 @@ async function loadLogEntries() {
     // Group logs by date
     const groupedLogs = {};
     logs.forEach(log => {
-      if (!groupedLogs[log.date]) {
-        groupedLogs[log.date] = [];
+      const date = new Date(log.timestamp).toLocaleDateString();
+      if (!groupedLogs[date]) {
+        groupedLogs[date] = [];
       }
-      groupedLogs[log.date].push(log);
+      groupedLogs[date].push(log);
     });
     
     // Create date groups
@@ -227,9 +253,12 @@ async function loadSettings() {
     settingsAlert.classList.toggle('hidden', permission);
     
     // Update next prompt time
-    updateNextPromptTime(settings.nextPromptTime);
+    if (settings.nextPromptTime) {
+      updateNextPromptTime(settings.nextPromptTime);
+    }
     
     EMOTIONS = settings.emotions;
+    updateEmotionNamesUI();
   } catch (error) {
     console.error('Error loading settings:', error);
   }
@@ -273,17 +302,17 @@ enableNotificationsBtn.addEventListener('click', async () => {
 });
 
 // Update next prompt time display
-function updateNextPromptTime(nextPromptTime) {
-  if (!nextPromptTime) return;
+function updateNextPromptTime(nextPromptTimeStr) {
+  if (!nextPromptTimeStr) return;
   
-  const next = new Date(nextPromptTime);
+  const next = new Date(nextPromptTimeStr);
   const now = new Date();
   const diff = Math.max(0, Math.floor((next - now) / 1000 / 60));
   
   const hours = Math.floor(diff / 60);
   const minutes = diff % 60;
   
-  nextPromptTime.textContent = `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}`;
+  nextPromptTimeElement.textContent = `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}`;
 }
 
 // Save emotion names
@@ -305,6 +334,7 @@ saveEmotionNames.addEventListener('click', async () => {
     
     if (response.success) {
       EMOTIONS = updatedEmotions;
+      updateEmotionNamesUI();
       alert('Emotion names updated successfully!');
     }
   } catch (error) {
@@ -323,6 +353,14 @@ setInterval(() => {
 }, 60000);
 
 // Initial load
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', async () => {
+  // Load settings first to get emotion names
+  const response = await chrome.runtime.sendMessage({ type: 'getSettings' });
+  if (response.settings?.emotions) {
+    EMOTIONS = response.settings.emotions;
+    updateEmotionNamesUI();
+  }
+  
+  // Switch to log tab
   document.getElementById('logTab').click();
 });
