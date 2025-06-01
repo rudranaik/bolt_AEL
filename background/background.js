@@ -80,7 +80,9 @@ function showNotification() {
     buttons: [
       { title: 'Log Now' }
     ],
-    priority: 2
+    priority: 2,
+    requireInteraction: true,
+    silent: false
   });
 }
 
