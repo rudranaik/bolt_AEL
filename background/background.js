@@ -86,13 +86,35 @@ function showNotification() {
   });
 }
 
-// Handle notification button click
-chrome.notifications.onButtonClicked.addListener((notificationId, buttonIndex) => {
-  if (buttonIndex === 0) {
-    // Open popup for logging
-    chrome.action.openPopup();
-  }
+// Handle notification button click and notification click
+chrome.notifications.onButtonClicked.addListener((notificationId) => {
+  chrome.notifications.clear(notificationId);
+  openPopup();
 });
+
+chrome.notifications.onClicked.addListener((notificationId) => {
+  chrome.notifications.clear(notificationId);
+  openPopup();
+});
+
+// Function to open popup
+function openPopup() {
+  chrome.windows.getCurrent(async (window) => {
+    const width = 360;
+    const height = 600;
+    const left = (window.width - width) / 2;
+    const top = (window.height - height) / 2;
+
+    await chrome.windows.create({
+      url: 'popup/popup.html',
+      type: 'popup',
+      width: width,
+      height: height,
+      left: Math.round(left),
+      top: Math.round(top)
+    });
+  });
+}
 
 // Listen for messages from popup
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
