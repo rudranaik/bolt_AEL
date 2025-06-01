@@ -57,6 +57,9 @@ tabButtons.forEach(button => {
         EMOTIONS = response.settings.emotions;
         updateEmotionNamesUI();
       }
+    } else if (button.id === 'aboutTab') {
+      // No special loading needed for about tab
+      document.getElementById('aboutSection').classList.add('active');
     }
   });
 });
@@ -343,14 +346,31 @@ saveEmotionNames.addEventListener('click', async () => {
   }
 });
 
-// Update next prompt time every minute
-setInterval(() => {
+// Optimize next prompt time updates
+let nextPromptInterval;
+
+function startNextPromptTimer() {
+  // Clear existing interval
+  if (nextPromptInterval) {
+    clearInterval(nextPromptInterval);
+  }
+
+  // Initial update
   chrome.runtime.sendMessage({ type: 'getSettings' }, (response) => {
     if (response.settings?.nextPromptTime) {
       updateNextPromptTime(response.settings.nextPromptTime);
     }
   });
-}, 60000);
+
+  // Update every 30 seconds instead of every minute
+  nextPromptInterval = setInterval(() => {
+    chrome.runtime.sendMessage({ type: 'getSettings' }, (response) => {
+      if (response.settings?.nextPromptTime) {
+        updateNextPromptTime(response.settings.nextPromptTime);
+      }
+    });
+  }, 30000);
+}
 
 // Initial load
 document.addEventListener('DOMContentLoaded', async () => {
@@ -363,4 +383,14 @@ document.addEventListener('DOMContentLoaded', async () => {
   
   // Switch to log tab
   document.getElementById('logTab').click();
+  
+  // Start the timer
+  startNextPromptTimer();
+});
+
+// Clean up when popup closes
+window.addEventListener('unload', () => {
+  if (nextPromptInterval) {
+    clearInterval(nextPromptInterval);
+  }
 });
