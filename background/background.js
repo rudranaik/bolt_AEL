@@ -36,23 +36,29 @@ chrome.runtime.onInstalled.addListener(async () => {
 
 // Setup notification alarm based on current settings
 async function setupAlarm() {
-  const storage = await chrome.storage.local.get('settings');
-  const settings = storage.settings || DEFAULT_SETTINGS;
-  
-  // Clear any existing alarms
-  await chrome.alarms.clearAll();
-  
-  // Create new alarm with current frequency
-  await chrome.alarms.create('logReminder', { 
-    periodInMinutes: settings.frequency,
-    when: Date.now() + 1000 // Start first alarm in 1 second
-  });
+  try {
+    const storage = await chrome.storage.local.get('settings');
+    const settings = storage.settings || DEFAULT_SETTINGS;
+    
+    // Clear any existing alarms
+    await chrome.alarms.clearAll();
+    
+    // Create new alarm with current frequency
+    await chrome.alarms.create('logReminder', { 
+      periodInMinutes: settings.frequency,
+      when: Date.now() + 1000 // Start first alarm in 1 second
+    });
 
-  // Update next prompt time
-  settings.nextPromptTime = new Date(Date.now() + settings.frequency * 60000).toISOString();
-  await chrome.storage.local.set({ settings });
-  
-  console.log(`Alarm set to trigger every ${settings.frequency} minutes`);
+    // Update next prompt time
+    settings.nextPromptTime = new Date(Date.now() + settings.frequency * 60000).toISOString();
+    await chrome.storage.local.set({ settings });
+    
+    console.log(`Alarm set to trigger every ${settings.frequency} minutes`);
+    return true;
+  } catch (error) {
+    console.error('Error setting up alarm:', error);
+    return false;
+  }
 }
 
 // Listen for alarm
@@ -65,26 +71,34 @@ chrome.alarms.onAlarm.addListener((alarm) => {
 
 // Update next prompt time
 async function updateNextPromptTime() {
-  const storage = await chrome.storage.local.get('settings');
-  const settings = storage.settings || DEFAULT_SETTINGS;
-  settings.nextPromptTime = new Date(Date.now() + settings.frequency * 60000).toISOString();
-  await chrome.storage.local.set({ settings });
+  try {
+    const storage = await chrome.storage.local.get('settings');
+    const settings = storage.settings || DEFAULT_SETTINGS;
+    settings.nextPromptTime = new Date(Date.now() + settings.frequency * 60000).toISOString();
+    await chrome.storage.local.set({ settings });
+  } catch (error) {
+    console.error('Error updating next prompt time:', error);
+  }
 }
 
 // Display notification
 function showNotification() {
-  chrome.notifications.create({
-    type: 'basic',
-    iconUrl: '/icons/icon128.png',
-    title: 'Activity & Emotion Check-in',
-    message: 'What are you working on right now? How are you feeling?',
-    buttons: [
-      { title: 'Log Now' }
-    ],
-    priority: 2,
-    requireInteraction: true,
-    silent: false
-  });
+  try {
+    chrome.notifications.create({
+      type: 'basic',
+      iconUrl: '/icons/icon128.png',
+      title: 'Activity & Emotion Check-in',
+      message: 'What are you working on right now? How are you feeling?',
+      buttons: [
+        { title: 'Log Now' }
+      ],
+      priority: 2,
+      requireInteraction: true,
+      silent: false
+    });
+  } catch (error) {
+    console.error('Error showing notification:', error);
+  }
 }
 
 // Handle notification button click and notification click
@@ -100,21 +114,25 @@ chrome.notifications.onClicked.addListener((notificationId) => {
 
 // Function to open popup
 function openPopup() {
-  chrome.windows.getCurrent(async (window) => {
-    const width = 360;
-    const height = 600;
-    const left = (window.width - width) / 2;
-    const top = (window.height - height) / 2;
+  try {
+    chrome.windows.getCurrent(async (window) => {
+      const width = 360;
+      const height = 600;
+      const left = (window.width - width) / 2;
+      const top = (window.height - height) / 2;
 
-    await chrome.windows.create({
-      url: 'popup/popup.html',
-      type: 'popup',
-      width: width,
-      height: height,
-      left: Math.round(left),
-      top: Math.round(top)
+      await chrome.windows.create({
+        url: 'popup/popup.html',
+        type: 'popup',
+        width: width,
+        height: height,
+        left: Math.round(left),
+        top: Math.round(top)
+      });
     });
-  });
+  } catch (error) {
+    console.error('Error opening popup:', error);
+  }
 }
 
 // Listen for messages from popup
@@ -157,33 +175,43 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
 
 // Save activity log to storage
 async function logActivity(logData) {
-  const timestamp = new Date().toISOString();
-  const date = new Date().toLocaleDateString();
-  const newEntry = {
-    id: Date.now(),
-    timestamp,
-    date,
-    activity: logData.activity,
-    emotion: logData.emotion,
-    formattedDate: new Date().toLocaleString()
-  };
-  
-  const data = await chrome.storage.local.get('logs');
-  const logs = data.logs || [];
-  logs.unshift(newEntry);
-  
-  await chrome.storage.local.set({ logs });
-  console.log('Activity logged:', newEntry);
-  return newEntry;
+  try {
+    const timestamp = new Date().toISOString();
+    const date = new Date().toLocaleDateString();
+    const newEntry = {
+      id: Date.now(),
+      timestamp,
+      date,
+      activity: logData.activity,
+      emotion: logData.emotion,
+      formattedDate: new Date().toLocaleString()
+    };
+    
+    const data = await chrome.storage.local.get('logs');
+    const logs = data.logs || [];
+    logs.unshift(newEntry);
+    
+    await chrome.storage.local.set({ logs });
+    console.log('Activity logged:', newEntry);
+    return newEntry;
+  } catch (error) {
+    console.error('Error logging activity:', error);
+    throw error;
+  }
 }
 
 // Update emotion names
 async function updateEmotions(emotions) {
-  const storage = await chrome.storage.local.get('settings');
-  const settings = storage.settings || DEFAULT_SETTINGS;
-  settings.emotions = emotions;
-  await chrome.storage.local.set({ settings });
-  return settings;
+  try {
+    const storage = await chrome.storage.local.get('settings');
+    const settings = storage.settings || DEFAULT_SETTINGS;
+    settings.emotions = emotions;
+    await chrome.storage.local.set({ settings });
+    return settings;
+  } catch (error) {
+    console.error('Error updating emotions:', error);
+    throw error;
+  }
 }
 
 // Ensure service worker stays active
@@ -197,3 +225,8 @@ chrome.runtime.onUpdateAvailable.addListener(async (details) => {
   console.log('Update available:', details);
   await setupAlarm();
 });
+
+// Keep service worker alive
+setInterval(() => {
+  console.log('Service worker heartbeat');
+}, 20000);
