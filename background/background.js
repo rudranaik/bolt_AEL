@@ -31,7 +31,7 @@ chrome.runtime.onInstalled.addListener(async () => {
   }
   
   // Schedule first alarm
-  setupAlarm();
+  await setupAlarm();
 });
 
 // Setup notification alarm based on current settings
@@ -43,8 +43,9 @@ async function setupAlarm() {
   await chrome.alarms.clearAll();
   
   // Create new alarm with current frequency
-  chrome.alarms.create('logReminder', { 
-    periodInMinutes: settings.frequency 
+  await chrome.alarms.create('logReminder', { 
+    periodInMinutes: settings.frequency,
+    when: Date.now() + 1000 // Start first alarm in 1 second
   });
 
   // Update next prompt time
@@ -119,8 +120,10 @@ function openPopup() {
 // Listen for messages from popup
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   if (message.type === 'settingsUpdated') {
-    setupAlarm();
-    sendResponse({ success: true });
+    setupAlarm()
+      .then(() => sendResponse({ success: true }))
+      .catch(error => sendResponse({ success: false, error: error.message }));
+    return true;
   }
   
   if (message.type === 'logEntry') {
@@ -182,3 +185,15 @@ async function updateEmotions(emotions) {
   await chrome.storage.local.set({ settings });
   return settings;
 }
+
+// Ensure service worker stays active
+chrome.runtime.onStartup.addListener(async () => {
+  console.log('Extension starting up');
+  await setupAlarm();
+});
+
+// Handle extension update
+chrome.runtime.onUpdateAvailable.addListener(async (details) => {
+  console.log('Update available:', details);
+  await setupAlarm();
+});
