@@ -497,3 +497,59 @@ textarea:focus {
   font-size: 12px;
   font-weight: bold;
 }
+
+/* Notification Banner */
+.notification-banner {
+  background-color: var(--warning);
+  color: white;
+  padding: 16px;
+  margin-bottom: 16px;
+  border-radius: var(--radius);
+  animation: slideDown 0.3s ease-out;
+}
+
+.banner-content {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.banner-icon {
+  font-size: 20px;
+  flex-shrink: 0;
+}
+
+.banner-content p {
+  flex-grow: 1;
+  margin: 0;
+  font-size: 14px;
+}
+
+.banner-btn {
+  background-color: white;
+  color: var(--warning);
+  border: none;
+  padding: 8px 12px;
+  border-radius: var(--radius-sm);
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+
+.banner-btn:hover {
+  background-color: var(--neutral-50);
+  transform: translateY(-1px);
+}
+
+@keyframes slideDown {
+  from {
+    transform: translateY(-100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}

@@ -372,6 +372,47 @@ function startNextPromptTimer() {
   }, 30000);
 }
 
+// Check notification permission status
+async function checkNotificationPermission() {
+  try {
+    const permission = await chrome.permissions.contains({
+      permissions: ['notifications']
+    });
+    
+    // Update UI based on permission status
+    const notificationBanner = document.getElementById('notificationBanner');
+    const notificationWarning = document.getElementById('notificationWarning');
+    const settingsAlert = document.getElementById('settingsAlert');
+    
+    if (!permission) {
+      notificationBanner.classList.remove('hidden');
+      notificationWarning.classList.remove('hidden');
+      settingsAlert.classList.remove('hidden');
+    } else {
+      notificationBanner.classList.add('hidden');
+      notificationWarning.classList.add('hidden');
+      settingsAlert.classList.add('hidden');
+    }
+  } catch (error) {
+    console.error('Error checking notification permission:', error);
+  }
+}
+
+// Enable notifications from log section
+document.getElementById('enableNotificationsFromLog')?.addEventListener('click', async () => {
+  try {
+    const granted = await chrome.permissions.request({
+      permissions: ['notifications']
+    });
+    
+    if (granted) {
+      await checkNotificationPermission();
+    }
+  } catch (error) {
+    console.error('Error requesting notification permission:', error);
+  }
+});
+
 // Initial load
 document.addEventListener('DOMContentLoaded', async () => {
   // Load settings first to get emotion names
@@ -386,6 +427,9 @@ document.addEventListener('DOMContentLoaded', async () => {
   
   // Start the timer
   startNextPromptTimer();
+  
+  // Add notification permission check
+  await checkNotificationPermission();
 });
 
 // Clean up when popup closes

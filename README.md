@@ -9,33 +9,28 @@ A Chrome extension that helps you track what you're doing and how you're feeling
 - Log viewer to review all past entries 
 - Data export functionality (CSV format)
 - Clean, intuitive user interface
+- Notification permission warnings
+- Customizable emotion labels
 
 ## Installation Instructions
 
 ### For Development:
 
-1. Clone or download this repository
-2. Open Chrome and navigate to `chrome://extensions/`
-3. Enable "Developer mode" using the toggle in the top right
-4. Click "Load unpacked" and select the extension folder
-5. The extension should now appear in your Chrome toolbar
-
-### Creating Icon Files
-
-For a complete extension, you'll need to create PNG icons in the following sizes:
-- 16x16 pixels (icons/icon16.png)
-- 48x48 pixels (icons/icon48.png)
-- 128x128 pixels (icons/icon128.png)
-
-You can use any image editing software to create these icons.
+1. Clone this repository
+2. Run `npm install` to install dependencies
+3. Open Chrome and navigate to `chrome://extensions/`
+4. Enable "Developer mode" using the toggle in the top right
+5. Click "Load unpacked" and select the extension folder
+6. The extension should now appear in your Chrome toolbar
 
 ## Usage
 
 1. Click the extension icon in your toolbar to open the popup
-2. Use the "Log" tab to record what you're doing and how you're feeling
-3. View your past entries in the "History" tab
-4. Configure notification frequency in the "Settings" tab
-5. Export your data as CSV from the "History" tab or Options page
+2. Enable notifications when prompted to receive check-in reminders
+3. Use the "Log" tab to record what you're doing and how you're feeling
+4. View your past entries in the "History" tab
+5. Configure notification frequency and customize emotion labels in the "Settings" tab
+6. Export your data as CSV from the "History" tab
 
 ## Data Privacy
 
